@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Chat Client</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #chat-container { width: 400px; border: 1px solid #ccc; padding: 10px; }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; }
+        .message { background-color: #f0f0f0; padding: 5px; margin-bottom: 5px; border-radius: 5px; }
+        .my-message { background-color: #dcf8c6; text-align: right; }
+        input[type="text"] { width: calc(100% - 70px); padding: 8px; }
+        button { padding: 8px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<h1>Real-time Chat Client</h1>
+
+<p>
+    <strong>Important:</strong> Remplacez YOUR_JWT_TOKEN_HERE par un jeton JWT valide obtenu depuis votre serveur (/auth/login).
+    Remplacez également YOUR_SENDER_ID, YOUR_RECIPIENT_ID et YOUR_CONVERSATION_ID par des IDs réels de votre base de données.
+    YOUR_CONVERSATION_ID doit être un ID de conversation existant ou un ID qui sera créé entre l'expéditeur et le destinataire.
+</p>
+
+<div id="chat-container">
+    <div id="messages"></div>
+    <input type="text" id="message-input" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+</div>
+
+<script>
+    // --- Configuration ---
+    const SERVER_URL = 'http://localhost:3000';
+    const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTc1NzA3MDMzNywiZXhwIjoxNzU3MDczOTM3fQ.ANc99h_u5ewXsP2xlRWx2pzjp6u0OrXKodA13AgRV98';
+    const SENDER_ID = 3; // !!! REMPLACEZ CECI PAR L'ID DE L'UTILISATEUR EXPÉDITEUR !!!
+    const RECIPIENT_ID = 2; // !!! REMPLACEZ CECI PAR L'ID DE L'UTILISATEUR DESTINATAIRE !!!
+    const CONVERSATION_ID = 1; // !!! REMPLACEZ CECI PAR UN ID DE CONVERSATION EXISTANT ou un qui sera créé !!!
+
+    // --- Connexion Socket.IO ---
+    const socket = io(SERVER_URL, {
+        auth: {
+            token: JWT_TOKEN
+        }
+    });
+
+    // --- Éléments DOM ---
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+
+    // --- Gestionnaires d'événements Socket ---
+    socket.on('connect', () => {
+        console.log('Connecté au serveur avec l\'ID de socket :', socket.id);
+        // Rejoindre la salle de conversation immédiatement après la connexion
+        socket.emit('join_conversation', CONVERSATION_ID);
+        console.log(`Tentative de rejoindre la salle de conversation : ${CONVERSATION_ID}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Déconnecté du serveur');
+    });
+
+    socket.on('connect_error', (err) => {
+        console.error('Erreur de connexion :', err.message);
+        alert('Erreur de connexion : ' + err.message + '. Vérifiez votre jeton JWT et l\'URL du serveur.');
+    });
+
+    socket.on('receive_message', (message) => {
+        console.log('Message reçu :', message);
+        displayMessage(message);
+    });
+
+    socket.on('message_error', (errorMessage) => {
+        console.error('Erreur d\'envoi de message :', errorMessage);
+        alert('Erreur lors de l\'envoi du message : ' + errorMessage);
+    });
+
+    // --- Fonctions UI ---
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        if (message.senderId === SENDER_ID) { // En supposant que SENDER_ID est l'ID de l'utilisateur actuel
+            messageElement.classList.add('my-message');
+            messageElement.textContent = `Vous : ${message.content}`;
+        } else {
+            messageElement.textContent = `Utilisateur ${message.senderId} : ${message.content}`;
+        }
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Faire défiler vers le bas
+    }
+
+    sendButton.addEventListener('click', () => {
+        sendMessage();
+    });
+
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        const content = messageInput.value.trim();
+        if (content) {
+            const messageData = {
+                conversationId: CONVERSATION_ID,
+                recipientId: RECIPIENT_ID, // Utilisé par le serveur pour trouver/créer la conversation si nécessaire
+                content: content
+            };
+            socket.emit('send_message', messageData);
+            messageInput.value = ''; // Effacer l'entrée
+        }
+    }
+</script>
+</body>
+</html>

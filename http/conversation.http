@@ -1,0 +1,4 @@
+### GET messages from conversation with conversationID
+
+GET http://localhost:3000/users/conversations/1/messages
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1NzA3MDMwMSwiZXhwIjoxNzU3MDczOTAxfQ.9O_OkGY2TM37ZspbyQgzimJdPXFkE7YD58ZWuxV01AM

@@ -8,4 +8,4 @@ Content-Type: application/json
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
-{"email": "koba@hotmail.com", "password": "1234"}
+{"email": "user2@mail.com", "password": "1234"}
