@@ -6,6 +6,8 @@ Je veux gérer l’inscription et la connexion des utilisateurs.
 Tâches :
 - Installer bcryptjs et jsonwebtoken.
 - Créer table `users` (id, username, email, password_hash, created_at).
+- Utiliser bcryptjs pour hasher les mots de passe.
+- Utiliser jsonwebtoken pour générer et vérifier des tokens.
 - Créer UserModel avec méthodes :
   - create(user)
   - findByEmail(email)
