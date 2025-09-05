@@ -1,23 +1,23 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const UserModel = require('../models/user.model');
+const User = require('../models/user.model');
 
 const AuthService = {
   async signup(user) {
     const { username, email, password } = user;
-    const existingUser = await UserModel.findByEmail(email);
+    const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       throw new Error('Email already in use');
     }
 
     const password_hash = await bcrypt.hash(password, 10);
-    const newUser = await UserModel.create({ username, email, password_hash });
+    const newUser = await User.create({ username, email, password_hash });
     return newUser;
   },
 
   async login(credentials) {
     const { email, password } = credentials;
-    const user = await UserModel.findByEmail(email);
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       throw new Error('Invalid credentials');
     }
