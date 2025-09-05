@@ -1,0 +1,17 @@
+Milestone 5 : Historique et robustesse
+
+Contexte :
+Je veux que l’utilisateur retrouve toujours son historique de messages.
+
+Tâches :
+- Améliorer l’API GET /conversations/:id/messages :
+  - Retourner messages triés par created_at ASC.
+  - Supporter pagination (query params: limit, offset).
+- Ajouter validation des inputs (express-validator).
+- Gérer erreurs de manière uniforme (middleware errorHandler).
+- Ajouter statut "online/offline" pour chaque user connecté via Socket.io (API GET /users renvoie aussi online: true/false).
+- Nettoyer le code et ajouter commentaires TODO pour la prochaine phase (chat rooms).
+
+Contraintes :
+- Respecter le style défini dans `.gemini/style.md`.
+- Code modulaire et testable.

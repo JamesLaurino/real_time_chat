@@ -1,0 +1,19 @@
+Milestone 3 : Mise en place Socket.io + Auth JWT
+
+Contexte :
+Je veux ajouter le temps réel pour le chat.
+
+Tâches :
+- Installer socket.io.
+- Configurer Socket.io dans index.js et le brancher sur le serveur Express.
+- Authentifier chaque connexion socket avec le JWT (token envoyé dans query ou headers).
+- Associer chaque userId connecté à son socketId dans une Map.
+- Gérer les événements :
+  - "connect" : log user connecté
+  - "disconnect" : retirer de la Map
+- Exposer une fonction getSocketId(userId) pour retrouver le socket d’un utilisateur.
+
+Contraintes :
+- Respecter le style défini dans `.gemini/style.md`.
+- Pas de logique SQL dans sockets → toujours passer par services.
+- Code commenté et structuré.

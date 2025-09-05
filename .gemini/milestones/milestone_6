@@ -1,0 +1,22 @@
+Milestone 6 : Gestion du statut online/offline des utilisateurs
+
+Contexte :
+Je veux que les utilisateurs voient qui est connecté en temps réel (boule verte = online).
+
+Tâches :
+- Quand un utilisateur se connecte via Socket.io (après validation JWT), il doit être marqué comme online.
+- Quand il se déconnecte (ou ferme la socket), il doit passer offline.
+- Maintenir un registre des connexions en mémoire (Map {userId → socketId}).
+- Diffuser un event Socket.io `user_status_changed` à tous les clients connectés lorsqu’un utilisateur change de statut.
+- Ajouter une API REST GET /users qui retourne :
+  - id
+  - username
+  - email
+  - online (true/false)
+- Permettre aux clients de rafraîchir la liste des utilisateurs et de voir qui est en ligne.
+
+Contraintes :
+- Respecter le style défini dans `.gemini/style.md`.
+- Le statut online doit toujours refléter la réalité des connexions sockets.
+- Pas besoin de persistance en DB pour le MVP (utiliser uniquement Socket.io et mémoire).
+- Ajouter des commentaires TODO pour une éventuelle persistance future en DB si nécessaire.

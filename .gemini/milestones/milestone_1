@@ -1,0 +1,21 @@
+Milestone 1 : Setup projet
+
+Contexte :
+Je veux démarrer une API backend Node.js pour un chat one-to-one.
+
+Tâches :
+- Installer les dépendances de base : express, mysql2, dotenv.
+- Configurer une connexion MySQL avec mysql2.
+- Créer la structure de dossiers :
+  /src
+    /config
+    /models
+    /services
+    /controllers
+    /routes
+    /sockets
+    index.js
+- Créer un fichier `.env` pour stocker DB credentials.
+- Configurer la connexion MySQL avec mysql2/promise dans /config/db.js.
+- Créer un serveur Express basique (index.js) qui démarre sur port 3000 et affiche "API running".
+- Ajouter un script "start": "node src/index.js" dans package.json.
