@@ -1,21 +1,44 @@
-const pool = require('../config/db');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const User = require('./user.model');
+const Conversation = require('./conversation.model');
 
-const MessageModel = {
-  async createMessage(conversationId, senderId, content) {
-    const [result] = await pool.execute(
-      'INSERT INTO messages (conversation_id, sender_id, content) VALUES (?, ?, ?)',
-      [conversationId, senderId, content]
-    );
-    return { id: result.insertId, conversation_id: conversationId, sender_id: senderId, content };
+const Message = sequelize.define('Message', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
+  conversation_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Conversation,
+      key: 'id',
+    },
+  },
+  sender_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id',
+    },
+  },
+  content: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  tableName: 'messages',
+  timestamps: false,
+});
 
-  async getMessagesByConversation(conversationId) {
-    const [rows] = await pool.execute(
-      'SELECT * FROM messages WHERE conversation_id = ? ORDER BY created_at ASC',
-      [conversationId]
-    );
-    return rows;
-  }
-};
+Message.belongsTo(Conversation, { foreignKey: 'conversation_id' });
+Message.belongsTo(User, { as: 'sender', foreignKey: 'sender_id' });
 
-module.exports = MessageModel;
+module.exports = Message;

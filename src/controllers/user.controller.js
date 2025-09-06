@@ -1,11 +1,11 @@
-const UserModel = require('../models/user.model');
-const ConversationModel = require('../models/conversation.model'); // Import ConversationModel
-const MessageModel = require('../models/message.model'); // Import MessageModel
+const User = require('../models/user.model');
+const ConversationService = require('../services/conversation.service');
+const Message = require('../models/message.model');
 
 const UserController = {
   async getMe(req, res) {
     try {
-      const user = await UserModel.findById(req.userId);
+      const user = await User.findByPk(req.userId);
       if (!user) {
         return res.status(404).json({ success: false, error: 'User not found' });
       }
@@ -18,7 +18,7 @@ const UserController = {
   async getUserConversations(req, res) {
     try {
       const userId = req.userId; // Get userId from authenticated request
-      const conversations = await ConversationModel.getUserConversations(userId);
+      const conversations = await ConversationService.getUserConversations(userId);
       res.status(200).json({ success: true, data: conversations });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
@@ -31,7 +31,7 @@ const UserController = {
       // Optional: Add authorization check here to ensure req.userId is part of this conversation
       // For now, we'll assume the user is authorized if they know the conversationId.
       // A more robust solution would involve checking if req.userId is user1_id or user2_id in the conversation.
-      const messages = await MessageModel.getMessagesByConversation(conversationId);
+      const messages = await Message.findAll({ where: { conversation_id: conversationId }, include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }], order: [['created_at', 'ASC']] });
       res.status(200).json({ success: true, data: messages });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });

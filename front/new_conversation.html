@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Conversation</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        h1 { color: #333; }
+        #container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .message { padding: 8px; margin-bottom: 8px; border-radius: 5px; line-height: 1.4; }
+        .my-message { background-color: #dcf8c6; text-align: left; margin-left: 50px; }
+        .other-message { background-color: #f1f1f1; text-align: left; margin-right: 50px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], textarea { width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <h1>Start a New Conversation</h1>
+
+    <div id="form-new-conversation">
+        <div class="form-group">
+            <label for="recipient-id">Recipient User ID:</label>
+            <input type="text" id="recipient-id" placeholder="Enter recipient's user ID">
+        </div>
+        <div class="form-group">
+            <label for="message-input">Your Message:</label>
+            <textarea id="message-input" placeholder="Type your first message..." rows="3"></textarea>
+        </div>
+        <button id="send-button">Send</button>
+    </div>
+
+    <div id="chat-view" class="hidden">
+        <h2>Chat</h2>
+        <div id="messages"></div>
+        <div class="form-group">
+             <textarea id="reply-input" placeholder="Type your message..." rows="3"></textarea>
+        </div>
+        <button id="reply-button">Send Reply</button>
+    </div>
+</div>
+
+<script>
+    // --- Configuration ---
+    const SERVER_URL = 'http://localhost:3000';
+    const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1NzE4NzU5OSwiZXhwIjoxNzU3MTkxMTk5fQ.1P7KaOWbl4peoQXXXCUE8AlDe4iKkxKqWOFwfFHf0QA';
+    const SENDER_ID = 2; // This should match the userId in the JWT token
+
+    // --- DOM Elements ---
+    const recipientIdInput = document.getElementById('recipient-id');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const replyInput = document.getElementById('reply-input');
+    const replyButton = document.getElementById('reply-button');
+    const messagesDiv = document.getElementById('messages');
+    const formNewConversation = document.getElementById('form-new-conversation');
+    const chatView = document.getElementById('chat-view');
+
+    let socket;
+    let conversationId = null;
+    let recipientId = null;
+
+    // --- Socket Connection ---
+    function connectSocket() {
+        if (socket) socket.disconnect();
+
+        socket = io(SERVER_URL, {
+            auth: { token: JWT_TOKEN }
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to server with socket ID:', socket.id);
+        });
+
+        socket.on('receive_message', (message) => {
+            console.log('Message received:', message);
+            if (!conversationId) {
+                conversationId = message.conversationId;
+                socket.emit('join_conversation', conversationId);
+                formNewConversation.classList.add('hidden');
+                chatView.classList.remove('hidden');
+            }
+            displayMessage(message);
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Connection error:', err.message);
+            alert('Connection Error: ' + err.message);
+        });
+        
+        socket.on('message_error', (errorMessage) => {
+            console.error('Message error:', errorMessage);
+            alert('Message Error: ' + errorMessage);
+        });
+    }
+
+    // --- UI Functions ---
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        if (message.senderId === SENDER_ID) {
+            messageElement.classList.add('my-message');
+            messageElement.textContent = `You: ${message.content}`;
+        } else {
+            messageElement.classList.add('other-message');
+            messageElement.textContent = `User ${message.senderId}: ${message.content}`;
+        }
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // --- Event Listeners ---
+    sendButton.addEventListener('click', () => {
+        recipientId = recipientIdInput.value.trim();
+        const content = messageInput.value.trim();
+
+        if (!recipientId || !content) {
+            alert('Please enter a recipient ID and a message.');
+            return;
+        }
+        
+        connectSocket();
+
+        const messageData = {
+            recipientId: parseInt(recipientId),
+            content: content,
+            conversationId: null // Important: Let the backend create the conversation
+        };
+        
+        // We need to wait for the connection to be established
+        setTimeout(() => {
+            if(socket.connected) {
+                socket.emit('send_message', messageData);
+                messageInput.value = '';
+            } else {
+                alert('Could not connect to the server. Please try again.');
+            }
+        }, 500);
+    });
+
+    replyButton.addEventListener('click', () => {
+        const content = replyInput.value.trim();
+        if (content && conversationId && recipientId) {
+            const messageData = {
+                conversationId: conversationId,
+                recipientId: parseInt(recipientId),
+                content: content
+            };
+            socket.emit('send_message', messageData);
+            replyInput.value = '';
+        }
+    });
+
+</script>
+</body>
+</html>
