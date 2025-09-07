@@ -1,4 +1,3 @@
-
 const express = require('express');
 const http = require('http');
 const { initSocket } = require('./sockets/socketManager');
@@ -29,14 +28,21 @@ app.use('/conversations', conversationRoutes);
 
 app.use(errorHandler);
 
-// Sync Sequelize models with the database
-sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Database & tables created!');
-    server.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+const startServer = () => {
+  sequelize.sync({ alter: true })
+    .then(() => {
+      console.log('Database & tables created!');
+      server.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+      });
+    })
+    .catch(err => {
+      console.error('Unable to connect to the database:', err);
     });
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
+};
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, server };
