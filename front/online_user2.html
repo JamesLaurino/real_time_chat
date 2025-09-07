@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Chat Client</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #chat-container { width: 400px; border: 1px solid #ccc; padding: 10px; }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; }
+        .message { background-color: #f0f0f0; padding: 5px; margin-bottom: 5px; border-radius: 5px; }
+        .my-message { background-color: #dcf8c6; text-align: right; }
+        input[type="text"] { width: calc(100% - 70px); padding: 8px; }
+        button { padding: 8px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<h1>Real-time Chat Client (User 1)</h1>
+
+<p>
+    <strong>Important:</strong> Assurez-vous que le jeton JWT et les IDs ci-dessous sont valides.
+</p>
+
+<div id="chat-container">
+    <div id="messages"></div>
+    <input type="text" id="message-input" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+</div>
+
+<script>
+    // --- Configuration ---
+    const SERVER_URL = 'http://localhost:3000';
+    // !!! REMPLACEZ PAR UN JETON JWT VALIDE POUR L'UTILISATEUR 2 !!!
+    const JWT_TOKEN =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1NzI1NDk3OSwiZXhwIjoxNzU3MjU4NTc5fQ.Oke93Ak8EG4B8_H0jhHc42TlLUpIOf2SkpODvKPUOMk';
+    const SENDER_ID = 2;
+    const RECIPIENT_ID = 1;
+    const CONVERSATION_ID = 1;
+
+    // --- Connexion Socket.IO ---
+    const socket = io(SERVER_URL, {
+        auth: {
+            token: JWT_TOKEN
+        }
+    });
+
+    // --- Éléments DOM ---
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+
+    // --- Gestionnaires d'événements Socket ---
+    socket.on('connect', () => {
+        console.log('Connecté au serveur avec l\'ID de socket :', socket.id);
+        socket.emit('join_conversation', CONVERSATION_ID);
+        console.log(`Tentative de rejoindre la salle de conversation : ${CONVERSATION_ID}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Déconnecté du serveur');
+    });
+
+    socket.on('connect_error', (err) => {
+        console.error('Erreur de connexion :', err.message);
+        alert('Erreur de connexion : ' + err.message);
+    });
+
+    socket.on('receive_message', (message) => {
+        console.log('Message reçu :', message);
+        displayMessage(message);
+    });
+
+    socket.on('message_error', (errorMessage) => {
+        console.error('Erreur d\'envoi de message :', errorMessage);
+        alert('Erreur lors de l\'envoi du message : ' + errorMessage);
+    });
+
+    // --- NOUVEAU : Écoute des changements de statut ---
+    socket.on('user_status_changed', (data) => {
+        console.log('Changement de statut détecté :', data);
+        // Affiche une alerte pour voir le changement en temps réel
+        alert(`L'utilisateur ${data.userId} est maintenant ${data.online ? 'en ligne' : 'hors ligne'}.`);
+    });
+
+    // --- Fonctions UI ---
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        if (message.senderId === SENDER_ID) {
+            messageElement.classList.add('my-message');
+            messageElement.textContent = `Vous : ${message.content}`;
+        } else {
+            messageElement.textContent = `Utilisateur ${message.senderId} : ${message.content}`;
+        }
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const content = messageInput.value.trim();
+        if (content) {
+            const messageData = {
+                conversationId: CONVERSATION_ID,
+                recipientId: RECIPIENT_ID,
+                content: content
+            };
+            socket.emit('send_message', messageData);
+            messageInput.value = '';
+        }
+    }
+</script>
+</body>
+</html>
