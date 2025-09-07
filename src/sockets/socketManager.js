@@ -2,7 +2,7 @@ const socketIO = require('socket.io');
 const { authenticateSocket } = require('../middleware/socket.middleware');
 const MessageService = require('../services/message.service'); // Import MessageService
 
-const userSocketMap = new Map();
+const onlineUsers = new Map();
 let ioInstance;
 
 function initSocket(server) {
@@ -18,13 +18,16 @@ function initSocket(server) {
   io.on('connection', (socket) => {
     const { userId } = socket.decoded;
     console.log(`User connected: ${userId} with socket ${socket.id}`);
-    userSocketMap.set(userId, socket.id);
+    onlineUsers.set(userId, true);
 
     // Join conversation room
+    // TODO: Extend this for group chats (rooms with multiple users)
     socket.on('join_conversation', (conversationId) => {
       socket.join(conversationId);
       console.log(`User ${userId} joined conversation room: ${conversationId}`);
     });
+
+    // TODO: Add a 'leave_conversation' event for when a user closes a chat window
 
     // Handle sending messages
     socket.on('send_message', async ({ conversationId, recipientId, content }) => {
@@ -40,15 +43,15 @@ function initSocket(server) {
 
     socket.on('disconnect', () => {
       console.log(`User disconnected: ${userId}`);
-      userSocketMap.delete(userId);
+      onlineUsers.delete(userId);
     });
   });
 
   return io;
 }
 
-function getSocketId(userId) {
-  return userSocketMap.get(userId);
+function isUserOnline(userId) {
+  return onlineUsers.has(userId);
 }
 
 function getIo() {
@@ -60,6 +63,7 @@ function getIo() {
 
 module.exports = {
   initSocket,
-  getSocketId,
+  isUserOnline,
   getIo,
+  onlineUsers,
 };

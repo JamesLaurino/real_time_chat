@@ -1,0 +1,93 @@
+###
+# Milestone 5 Test Scenarios
+#
+# Before starting:
+# 1. Make sure your server is running (npm start)
+# 2. Get a valid JWT token by running the "Login" request in `auth.http`
+#    and copy the token here.
+@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1NzI0ODExNiwiZXhwIjoxNzU3MjUxNzE2fQ.JJ3MGqqg5FBKcUPZylnTEWHmcGUAZMr6e6V925oFPzM
+
+###
+# 1. Test Pagination on Messages
+# GET /conversations/:conversationId/messages
+#
+# ?limit=2 -> get only 2 messages
+# ?offset=1 -> skip the first message
+GET http://localhost:3000/conversations/2/messages?limit=2&offset=1
+Authorization: {{jwt_token}}
+
+###
+
+# 2. Sign up invalid with to short password
+# POST /auth/signup
+#
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{"username":"test","email": "test@hotmail.com", "password": "1234"}
+
+###
+# Expected Response (422 Unprocessable Entity):
+# {
+#   "errors": [
+#     {
+#       "undefined": "Password must be at least 6 characters long"
+#     }
+#   ]
+# }
+
+
+###
+# b) Get messages with invalid conversationId
+GET http://localhost:3000/conversations/abc/messages
+Authorization: {{jwt_token}}
+
+# Expected Response (422 Unprocessable Entity):
+# {
+#   "errors": [
+#     {
+#       "conversationId": "Conversation ID must be an integer"
+#     }
+#   ]
+# }
+
+
+###
+# 3. Test Uniform Error Handling
+#
+# Any error should now return the same format:
+# { "success": false, "error": "Error message" }
+# For example, using a non-existent conversation ID:
+GET http://localhost:3000/conversations/999/messages
+Authorization: {{jwt_token}}
+
+
+###
+# 4. Test Online Status
+# GET /users
+#
+# To see `online: true`, make sure at least one user is connected
+# via a WebSocket client (like `front/new_conversation.html`).
+GET http://localhost:3000/users
+Authorization: {{jwt_token}}
+
+# Expected Response (example):
+# {
+#   "success": true,
+#   "data": [
+#     {
+#       "id": 1,
+#       "username": "Alice",
+#       "email": 'alice@example.com',
+#       "created_at": "...",
+#       "online": true
+#     },
+#     {
+#       "id": 2,
+#       "username": "Bob",
+#       "email": "bob@example.com",
+#       "created_at": "...",
+#       "online": false
+#     }
+#   ]
+# }

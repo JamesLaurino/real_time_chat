@@ -4,10 +4,12 @@ const http = require('http');
 const { initSocket } = require('./sockets/socketManager');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const conversationRoutes = require('./routes/conversation.routes');
 const sequelize = require('./config/db');
 const User = require('./models/user.model');
 const Conversation = require('./models/conversation.model');
 const Message = require('./models/message.model');
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 const server = http.createServer(app);
@@ -23,6 +25,9 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+app.use('/conversations', conversationRoutes);
+
+app.use(errorHandler);
 
 // Sync Sequelize models with the database
 sequelize.sync({ alter: true })

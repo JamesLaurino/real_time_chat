@@ -1,9 +1,13 @@
+
+@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1NzI0ODExNiwiZXhwIjoxNzU3MjUxNzE2fQ.JJ3MGqqg5FBKcUPZylnTEWHmcGUAZMr6e6V925oFPzM
+
+
 ### GET user information
 
 GET http://localhost:3000/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1NzEwNDEwMywiZXhwIjoxNzU3MTA3NzAzfQ.1F7lQ8-6RzESWU8dgOWq9Ia1qmNE97E65vo3wQhad-w
+Authorization: {{jwt_token}}
 
 ### GET user conversation
 
 GET http://localhost:3000/users/me/conversations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1NzEwNDEwMywiZXhwIjoxNzU3MTA3NzAzfQ.1F7lQ8-6RzESWU8dgOWq9Ia1qmNE97E65vo3wQhad-w
+Authorization: {{jwt_token}}

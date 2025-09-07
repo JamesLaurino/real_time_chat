@@ -25,9 +25,9 @@ async function testSocket() {
 
     socket.on('connect', () => {
       console.log('Socket connected successfully!', 'Socket ID:', socket.id);
-      // You can add more test logic here, like emitting an event
+      // You can add more test-99887 logic here, like emitting an event
 
-      // Disconnect after a few seconds for a clean test run
+      // Disconnect after a few seconds for a clean test-99887 run
       setTimeout(() => {
         socket.disconnect();
       }, 3000);
