@@ -20,6 +20,10 @@ function initSocket(server) {
     console.log(`User connected: ${userId} with socket ${socket.id}`);
     onlineUsers.set(userId, true);
 
+    // Broadcast to other users that this user is now online
+    // TODO: Persist user status change to database for historical tracking.
+    socket.broadcast.emit('user_status_changed', { userId, online: true });
+
     // Join conversation room
     // TODO: Extend this for group chats (rooms with multiple users)
     socket.on('join_conversation', (conversationId) => {
@@ -44,6 +48,8 @@ function initSocket(server) {
     socket.on('disconnect', () => {
       console.log(`User disconnected: ${userId}`);
       onlineUsers.delete(userId);
+      // TODO: Persist user status change to database for historical tracking.
+      ioInstance.emit('user_status_changed', { userId, online: false });
     });
   });
 
