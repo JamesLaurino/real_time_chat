@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique de Conversation</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #container { width: 500px; }
+        #chat-container { border: 1px solid #ccc; padding: 10px; }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; }
+        .message { background-color: #f0f0f0; padding: 5px; margin-bottom: 5px; border-radius: 5px; }
+        .my-message { background-color: #dcf8c6; text-align: right; }
+        input[type="text"], input[type="number"] { width: calc(100% - 22px); padding: 8px; margin-bottom: 10px; }
+        button { padding: 8px 15px; cursor: pointer; }
+        .config-section { margin-bottom: 20px; }
+        .config-section h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+
+<h1>Test d'Historique de Conversation</h1>
+
+<div id="container">
+    <div class="config-section">
+        <h2>Configuration</h2>
+        <p>
+            <strong>Important:</strong> Remplacez `YOUR_JWT_TOKEN_HERE` par un jeton JWT valide.
+            Indiquez l'ID de l'utilisateur actuel et l'ID de la conversation que vous souhaitez charger.
+        </p>
+        <label for="jwt-token">Jeton JWT :</label>
+        <input type="text" id="jwt-token" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc1NzI1MDkwNSwiZXhwIjoxNzU3MjU0NTA1fQ.sGl_8BEKXgPEpsg5nyjADhhYnGED5gRAOq1MQZWDavs">
+        <label for="user-id">ID Utilisateur Actuel :</label>
+        <input type="number" id="user-id" value="1">
+        <label for="conversation-id">ID Conversation :</label>
+        <input type="number" id="conversation-id" value="1">
+        <button id="fetch-button">Charger la Conversation</button>
+    </div>
+
+    <div id="chat-container" style="display: none;">
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+    </div>
+</div>
+
+<script>
+    // --- Configuration ---
+    const SERVER_URL = 'http://localhost:3000';
+
+    // --- Éléments DOM ---
+    const jwtInput = document.getElementById('jwt-token');
+    const userIdInput = document.getElementById('user-id');
+    const conversationIdInput = document.getElementById('conversation-id');
+    const fetchButton = document.getElementById('fetch-button');
+    const chatContainer = document.getElementById('chat-container');
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+
+    let socket;
+    let SENDER_ID;
+    let RECIPIENT_ID; // This will need to be inferred or pre-configured
+    let CONVERSATION_ID;
+
+    fetchButton.addEventListener('click', () => {
+        SENDER_ID = parseInt(userIdInput.value, 10);
+        CONVERSATION_ID = parseInt(conversationIdInput.value, 10);
+        const JWT_TOKEN = jwtInput.value.trim();
+
+        if (!SENDER_ID || !CONVERSATION_ID || !JWT_TOKEN) {
+            alert('Veuillez remplir tous les champs de configuration.');
+            return;
+        }
+
+        chatContainer.style.display = 'block';
+        fetchHistory(JWT_TOKEN);
+        connectSocket(JWT_TOKEN);
+    });
+
+    async function fetchHistory(token) {
+        try {
+            const response = await fetch(`${SERVER_URL}/conversations/${CONVERSATION_ID}/messages`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const history = await response.json();
+            messagesDiv.innerHTML = ''; // Clear previous messages
+            history.data.forEach(displayMessage);
+
+            // Infer recipient ID from the first message not sent by the current user
+            const firstOtherMessage = history.data.find(m => m.sender_id !== SENDER_ID);
+            if (firstOtherMessage) {
+                RECIPIENT_ID = firstOtherMessage.sender_id;
+            } else {
+                // If no other user has sent a message, we need a fallback.
+                // This is a limitation of this test UI.
+                console.warn("Impossible de déterminer l'ID du destinataire. L'envoi de nouveaux messages pourrait ne pas fonctionner comme prévu.");
+            }
+
+        } catch (error) {
+            console.error("Erreur lors de la récupération de l'historique:", error);
+            alert("Erreur lors de la récupération de l'historique. Vérifiez la console.");
+        }
+    }
+
+    function connectSocket(token) {
+        if (socket) socket.disconnect();
+
+        socket = io(SERVER_URL, {
+            auth: { token }
+        });
+
+        socket.on('connect', () => {
+            console.log("Connecté au serveur avec l'ID de socket :", socket.id);
+            socket.emit('join_conversation', CONVERSATION_ID);
+            console.log(`Tentative de rejoindre la salle de conversation : ${CONVERSATION_ID}`);
+        });
+
+        socket.on('disconnect', () => console.log('Déconnecté du serveur'));
+        socket.on('connect_error', (err) => alert('Erreur de connexion socket: ' + err.message));
+        socket.on('receive_message', (message) => displayMessage(message));
+        socket.on('message_error', (err) => alert('Erreur de message: ' + err));
+    }
+
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        // The API returns sender_id, but socket events return senderId
+        const sender = message.sender_id || message.senderId;
+        if (sender === SENDER_ID) {
+            messageElement.classList.add('my-message');
+            messageElement.textContent = `Vous : ${message.content}`;
+        } else {
+            messageElement.textContent = `Utilisateur ${sender} : ${message.content}`;
+        }
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function sendMessage() {
+        const content = messageInput.value.trim();
+        if (content && socket && socket.connected) {
+            if (!RECIPIENT_ID) {
+                alert("L'ID du destinataire n'a pas pu être déterminé. Impossible d'envoyer le message.");
+                return;
+            }
+            const messageData = {
+                conversationId: CONVERSATION_ID,
+                recipientId: RECIPIENT_ID,
+                content: content
+            };
+            socket.emit('send_message', messageData);
+            messageInput.value = '';
+        }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+</script>
+</body>
+</html>

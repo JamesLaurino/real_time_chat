@@ -1,4 +1,3 @@
-
 const express = require('express');
 const http = require('http');
 const { initSocket } = require('./sockets/socketManager');
@@ -10,6 +9,7 @@ const User = require('./models/user.model');
 const Conversation = require('./models/conversation.model');
 const Message = require('./models/message.model');
 const errorHandler = require("./middleware/errorHandler");
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
@@ -17,6 +17,7 @@ const port = process.env.PORT || 3000;
 
 initSocket(server);
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -29,14 +30,21 @@ app.use('/conversations', conversationRoutes);
 
 app.use(errorHandler);
 
-// Sync Sequelize models with the database
-sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Database & tables created!');
-    server.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+const startServer = () => {
+  sequelize.sync({ alter: true })
+    .then(() => {
+      console.log('Database & tables created!');
+      server.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+      });
+    })
+    .catch(err => {
+      console.error('Unable to connect to the database:', err);
     });
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
+};
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, server };
