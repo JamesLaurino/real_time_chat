@@ -7,7 +7,7 @@ function authenticateSocket(socket, next) {
     return next(new Error('Authentication error: Token not provided'));
   }
 
-  jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return next(new Error('Authentication error: Invalid token'));
     }
