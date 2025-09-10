@@ -5,7 +5,6 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
     "start": "node src/index.js",
-    "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js"
   },
   "keywords": [],
