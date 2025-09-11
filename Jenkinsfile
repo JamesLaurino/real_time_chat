@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/JamesLaurino/real_time_chat'
+                git branch: 'master', url: 'https://github.com/JamesLaurino/real_time_chat'
             }
         }
         stage('Build Docker image') {
