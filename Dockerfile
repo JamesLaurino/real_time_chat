@@ -19,11 +19,6 @@ WORKDIR /usr/src/app
 
 # Définir l'environnement de production
 ENV NODE_ENV=production
-ENV DB_HOST=82.29.172.74
-ENV DB_USER=root
-ENV DB_PASSWORD=1234
-ENV DB_NAME=real_chat_db_dev
-ENV JWT_SECRET=my_super_secret_dev_key
 
 # Copier les dépendances de production depuis l'étape de build
 COPY --from=builder /usr/src/app/node_modules ./node_modules
