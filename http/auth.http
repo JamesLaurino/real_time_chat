@@ -2,10 +2,10 @@
 POST http://localhost:3000/auth/signup
 Content-Type: application/json
 
-{"username":"koba","email": "koba@hotmail.com", "password": "1234"}
+{"username":"gin","email": "tonic@hotmail.com", "password": "password123"}
 
 ### LOGIN
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
-{"email": "bob@example.com", "password": "password456"}
+{"email": "tonic@hotmail.com", "password": "password123"}
