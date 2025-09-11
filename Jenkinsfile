@@ -21,7 +21,7 @@ pipeline {
         stage('Run container') {
             steps {
                 sh '''
-                docker rm -f my-webapp || true docker run -d --name my-webapp -p 3000:3000 my-webapp:latest
+                docker run -d --name my-webapp -p 3000:3000 my-webapp:latest
                 '''
             }
         }
