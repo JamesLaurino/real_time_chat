@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DB_HOST = 'localhost'
+        DB_HOST = '192.168.129.66'
         DB_NAME = 'real_chat_db_dev'
         NODE_ENV = 'development'
     }
