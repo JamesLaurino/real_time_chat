@@ -12,7 +12,7 @@ pipeline {
         }
         stage('Build Docker image') {
             steps {
-                sh 'docker build -t my-webapp:latest .'
+                bat 'docker build -t my-webapp:latest .'
             }
         }
         stage('Run container') {
@@ -22,7 +22,7 @@ pipeline {
                     string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
                     string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
                 ]) {
-                    sh """
+                    bat """
                     docker run -d \
                       --name my-webapp \
                       -p 3000:3000 \
