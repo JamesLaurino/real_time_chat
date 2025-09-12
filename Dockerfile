@@ -18,7 +18,7 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Définir l'environnement de production
-ENV NODE_ENV=production
+#ENV NODE_ENV=production
 
 # Copier les dépendances de production depuis l'étape de build
 COPY --from=builder /usr/src/app/node_modules ./node_modules
