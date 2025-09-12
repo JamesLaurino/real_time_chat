@@ -26,11 +26,11 @@ pipeline {
                     docker run -d \
                       --name my-webapp \
                       -p 3000:3000 \
-                      -e DB_HOST=${DB_HOST} \
-                      -e DB_NAME=${DB_NAME} \
+                      -e DB_HOST=localhost\
+                      -e DB_NAME=real_chat_db_dev \
                       -e DB_USER=root \
                       -e DB_PASSWORD=1234 \
-                      -e JWT_SECRET=retrerererebbhjuiui \
+                      -e JWT_SECRET="retrerererebbhjuiui" \
                       my-webapp:latest
                     """
                 }
