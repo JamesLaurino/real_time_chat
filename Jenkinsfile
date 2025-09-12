@@ -14,9 +14,9 @@ pipeline {
         stage('Build Docker image') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'DB_USER_SECRET', variable: 'DB_USER'),
-                    string(credentialsId: 'DB_PASSWORD_SECRET', variable: 'DB_PASSWORD'),
-                    string(credentialsId: 'JWT_SECRET_KEY', variable: 'JWT_SECRET')
+                    string(credentialsId: 'DB_USER', variable: 'DB_USER'),
+                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
                 ]) {
                     bat """
                     docker build ^
