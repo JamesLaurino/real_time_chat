@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DB_HOST = '82.29.172.74'
+        DB_HOST = 'localhost'
         DB_NAME = 'real_chat_db_dev'
     }
     stages {
