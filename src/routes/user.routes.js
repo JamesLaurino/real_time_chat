@@ -6,5 +6,6 @@ const authMiddleware = require('../middleware/auth.middleware');
 router.get('/me', authMiddleware, UserController.getMe);
 router.get('/me/conversations', authMiddleware, UserController.getUserConversations);
 router.get('/', authMiddleware, UserController.getAllUsers);
+router.put('/premium', authMiddleware, UserController.updatePremiumStatus);
 
 module.exports = router;

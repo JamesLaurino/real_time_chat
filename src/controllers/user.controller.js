@@ -1,10 +1,20 @@
 const User = require('../models/user.model');
 const ConversationService = require('../services/conversation.service');
+const UserService = require('../services/user.service');
 const Message = require('../models/message.model');
 const Conversation = require('../models/conversation.model');
 const { onlineUsers } = require('../sockets/socketManager');
 
 const UserController = {
+  async updatePremiumStatus(req, res, next) {
+    try {
+      const { email, premium } = req.body;
+      const updatedUser = await UserService.updatePremiumStatus(email, premium);
+      res.status(200).json({ success: true, data: updatedUser });
+    } catch (error) {
+      next(error);
+    }
+  },
   async getMe(req, res, next) {
     try {
       const user = await User.findByPk(req.userId);
