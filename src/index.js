@@ -51,7 +51,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('API running !!!');
+  res.send('API running test');
 });
 
 app.use('/auth', authRoutes);
