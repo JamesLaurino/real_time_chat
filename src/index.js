@@ -65,7 +65,7 @@ const startServer = () => {
     .then(() => {
       console.log('Database & tables created!');
       server.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
+        console.log(`Server is running on port ${port} !!!`);
       });
     })
     .catch(err => {
