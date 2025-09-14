@@ -11,14 +11,20 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/JamesLaurino/real_time_chat'
             }
         }
-       stage('Clean and Stop') {
+        stage('Clean and Stop') {
             steps {
                 script {
-                    bat 'docker ps --filter "name=real_time_chat_backend" --format "{{.Names}}" | findstr /i "^real_time_chat_backend" >nul'
-                    if(%errorlevel%==0) {
+                    def result = bat(
+                        script: 'docker ps -a --filter "name=real_time_chat_backend" --format "{{.Names}}"',
+                        returnStdout: true
+                    ).trim()
+
+                    if (result == 'real_time_chat_backend') {
                         echo 'Stopping and removing existing container...'
-                        bat "docker stop real_time_chat_backend"
-                        bat "docker rm real_time_chat_backend"
+                        bat 'docker stop real_time_chat_backend'
+                        bat 'docker rm real_time_chat_backend'
+                    } else {
+                        echo 'Container real_time_chat_backend not found — nothing to stop.'
                     }
                 }
             }
