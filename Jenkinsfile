@@ -11,6 +11,17 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/JamesLaurino/real_time_chat'
             }
         }
+        stage('Run Unit Tests') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+                ]) {
+
+                    bat "npm install"
+                    bat "npm run test"
+                }
+            }
+        }
        stage('Clean and Stop') {
             steps {
                 script {
