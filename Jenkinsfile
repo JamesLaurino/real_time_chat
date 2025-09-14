@@ -14,14 +14,9 @@ pipeline {
        stage('Clean and Stop') {
             steps {
                 script {
-                    def containerExists = bat(script: "docker ps -a --filter \"name=real_time_chat_backend\" --format \"{{.Names}}\"", returnStdout: true).trim()
-                    if (containerExists == 'real_time_chat_backend') {
-                        echo 'Stopping and removing existing container...'
-                        bat "docker stop real_time_chat_backend"
-                        bat "docker rm real_time_chat_backend"
-                    } else {
-                        echo 'No existing container found. Skipping removal.'
-                    }
+                    echo 'Stopping and removing existing container...'
+                    bat "docker stop real_time_chat_backend"
+                    bat "docker rm real_time_chat_backend"
                 }
             }
         }
