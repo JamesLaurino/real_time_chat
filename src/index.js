@@ -51,7 +51,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('API running');
+  res.send('API running !!!');
 });
 
 app.use('/auth', authRoutes);
@@ -65,7 +65,7 @@ const startServer = () => {
     .then(() => {
       console.log('Database & tables created!');
       server.listen(port, () => {
-        console.log(`Server is running on port ${port} !!!`);
+        console.log(`Server is running on port ${port}`);
       });
     })
     .catch(err => {
