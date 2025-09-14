@@ -15,12 +15,10 @@ const allowedOrigins = [
   'http://localhost:4200',
   'http://localhost:3001',
   'http://localhost:63342',
+  'https://your-project-name.web.app',
+  'https://your-project-name.firebaseapp.com'
 ];
 
-if (process.env.NODE_ENV === 'production') {
-  allowedOrigins.push('https://your-project-name.web.app');
-  allowedOrigins.push('https://your-project-name.firebaseapp.com');
-}
 
 const corsOptions = {
   origin: (origin, callback) => {
