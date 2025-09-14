@@ -3,7 +3,7 @@ pipeline {
     environment {
         DB_HOST = '192.168.129.66'
         DB_NAME = 'real_chat_db_dev'
-        NODE_ENV = 'development'
+        NODE_ENV = 'production'
     }
     stages {
         stage('Checkout') {
