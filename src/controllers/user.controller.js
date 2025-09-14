@@ -69,7 +69,7 @@ const UserController = {
   async getAllUsers(req, res, next) {
     try {
       const users = await User.findAll({
-        attributes: ['id', 'username', 'email', 'created_at'],
+        attributes: ['id', 'username', 'email','premium', 'created_at'],
       });
 
       const usersWithStatus = users.map(user => {

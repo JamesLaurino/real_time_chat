@@ -1,5 +1,5 @@
 
-@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBbGljZSIsInByZW1pdW0iOnRydWUsImlhdCI6MTc1NzY2Nzc4NCwiZXhwIjoxNzU3NjcxMzg0fQ.dpKCBBK4vuXWW-V40iTvKTy5zK3iaksseRhj_ulT540
+@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJnaW4iLCJwcmVtaXVtIjpmYWxzZSwiaWF0IjoxNzU3ODUwMDQxLCJleHAiOjE3NTc4NTM2NDF9.HGHiwLo7sJJf_9qclMz1WcRtWhZykeVFaOU6IVXgOxM
 
 ### GET user information
 
@@ -18,3 +18,7 @@ Authorization: {{jwt_token}}
 Content-Type: application/json
 
 {"email":"alice@example.com", "premium": true}
+
+### GET ALL USERS
+GET http://localhost:3000/users
+Authorization: {{jwt_token}}
