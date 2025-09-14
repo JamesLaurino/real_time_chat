@@ -14,7 +14,7 @@ pipeline {
        stage('Clean and Stop') {
             steps {
                 script {
-                    docker ps --filter "name=real_time_chat_backend" --format "{{.Names}}" | findstr /i "real_time_chat_backend" >nul
+                    bat 'docker ps --filter "name=real_time_chat_backend" --format "{{.Names}}" | findstr /i "^real_time_chat_backend" >nul'
                     if(%errorlevel%==0) {
                         echo 'Stopping and removing existing container...'
                         bat "docker stop real_time_chat_backend"
