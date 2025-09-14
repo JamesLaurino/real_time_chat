@@ -11,6 +11,18 @@ pipeline {
                 git branch: 'master', url: 'https://github.com/JamesLaurino/real_time_chat'
             }
         }
+        stage('Run Unit Tests') {
+                    steps {
+                        bat "npm install"
+                        bat "npm run test"
+                    }
+                }
+        stage('Clean and Stop') {
+            steps {
+                bat "docker stop real_time_chat_backend || true"
+                bat "docker rm real_time_chat_backend || true"
+            }
+        }
         stage('Build Docker image') {
             steps {
                 withCredentials([
@@ -26,7 +38,7 @@ pipeline {
                       --build-arg DB_USER=${DB_USER} ^
                       --build-arg DB_PASSWORD=${DB_PASSWORD} ^
                       --build-arg JWT_SECRET=${JWT_SECRET} ^
-                      -t my-webapp:latest .
+                      -t real_time_chat_backend:latest .
                     """
                 }
             }
@@ -35,9 +47,9 @@ pipeline {
             steps {
                 bat """
                 docker run -d ^
-                  --name my-webapp ^
+                  --name real_time_chat_backend ^
                   -p 3000:3000 ^
-                  my-webapp:latest
+                  real_time_chat_backend:latest
                 """
             }
         }
