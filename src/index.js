@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const conversationRoutes = require('./routes/conversation.routes');
+const messageRoutes = require('./routes/message.routes');
 const sequelize = require('./config/db');
 const errorHandler = require("./middleware/errorHandler");
 const cors = require('cors');
@@ -12,11 +13,8 @@ const cors = require('cors');
 // Configuration CORS
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:4200',
+  'http://localhost:80',
   'http://localhost:3001',
-  'http://localhost:63342',
-  'https://your-project-name.web.app',
-  'https://your-project-name.firebaseapp.com'
 ];
 
 
@@ -55,6 +53,7 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/conversations', conversationRoutes);
+app.use('/messages', messageRoutes);
 
 app.use(errorHandler);
 
