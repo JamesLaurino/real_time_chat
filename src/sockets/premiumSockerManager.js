@@ -1,25 +1,7 @@
-/**
- * @file premiumSockerManager.js
- * @description Gère la fonctionnalité de chat en temps réel pour les conversations premium en utilisant Socket.IO.
- *
- * @logique
- * 1.  **Isolation avec un Chemin Unique**: Ce manager initialise Socket.IO avec un chemin personnalisé : `path: '/socket.io-premium/'`.
- *     Ce changement est crucial pour éviter les conflits avec l'instance principale de Socket.IO (`socketManager.js`). Il garantit que
- *     les deux services fonctionnent de manière indépendante sur le même serveur HTTP sans interférer avec leurs connexions respectives.
- *
- * 2.  **Authentification Spécifique au Namespace**: Le middleware d'authentification (`authenticateSocket`) est appliqué directement
- *     au namespace `/conversation/premium` (`premiumNamespace.use(authenticateSocket)`). Cela garantit que seuls les utilisateurs
- *     authentifiés peuvent se connecter à ce point d'accès spécifique. Appliquer le middleware au namespace est la méthode correcte
- *     pour le protéger.
- *
- * 3.  **Gestion de la Liste des Utilisateurs**:
- *     - Lorsqu'un utilisateur rejoint une conversation (`join_conversation`), le serveur récupère la liste de tous les IDs utilisateurs
- *       présents dans cette "room" et la diffuse à tous les membres via l'événement `user_list_update`.
- *     - Lors de la déconnexion (`disconnect`), le serveur recalcule la liste des utilisateurs pour les rooms où il
- *       se trouvait et envoie une liste mise à jour. Cela permet au frontend d'afficher une liste précise des participants en temps réel.
- */
 const socketIO = require('socket.io');
 const { authenticateSocket } = require('../middleware/socket.middleware');
+const ConversationUserService = require('../services/conversationUser.service.js');
+const ConversationService = require('../services/conversation.service.js');
 const MessageService = require('../services/message.service');
 
 const onlineUsers = new Map();
@@ -38,28 +20,46 @@ function initPremiumSocket(server) {
     premiumNamespace.use(authenticateSocket);
 
     premiumNamespace.on('connection', (socket) => {
-        const { userId } = socket.decoded;
+        const { id: userId } = socket.decoded; // Use 'id' from JWT payload and rename it to userId
         console.log(`User connected: ${userId} with socket ${socket.id}`);
         onlineUsers.set(userId, true);
 
         socket.broadcast.emit('user_status_changed', { userId, online: true });
 
-        socket.on('join_conversation', async (conversationId) => {
-            socket.join(conversationId);
-            console.log(`User ${userId} joined conversation room: ${conversationId}`);
+        socket.on('join_conversation', async (conversationName) => { // e.g., conversationName is 'premium'
+            if (conversationName === 'premium') {
+                socket.join('premium');
+                console.log(`User ${userId} joined premium conversation room`);
 
-            // Notify room members of the new user list
-            const socketsInRoom = await io.of('/conversation/premium').in(conversationId).fetchSockets();
-            const userIdsInRoom = socketsInRoom.map(s => s.decoded.userId);
-            io.of('/conversation/premium').to(conversationId).emit('user_list_update', userIdsInRoom);
+                const premiumConversation = await ConversationService.findOrCreatePremiumGroup();
+
+                // Here you would add the user to the conversation_user table
+                // Note: You might want to check if the user is already in the group first
+                // For simplicity, we'll just try to add them.
+                try {
+                    await ConversationUserService.create({ conversation_id: premiumConversation.id, user_id: userId });
+                } catch (e) {
+                    // Ignore unique constraint errors if the user is already in the group
+                    if (e.name !== 'SequelizeUniqueConstraintError') {
+                        console.error('Failed to add user to premium group', e);
+                    }
+                }
+
+                const socketsInRoom = await premiumNamespace.in('premium').fetchSockets();
+                const userIdsInRoom = socketsInRoom.map(s => s.decoded.id);
+                premiumNamespace.to('premium').emit('user_list_update', userIdsInRoom);
+            }
         });
 
 
-        socket.on('send_message', async ({ conversationId, recipientId, content }) => {
+        socket.on('send_message', async ({ content }) => { // recipientId and conversationId are removed from client payload
             try {
-                const newMessage = await MessageService.sendMessage(userId,
-                    recipientId, content, conversationId);
-                socket.nsp.to(conversationId).emit('receive_message', newMessage);
+                // Find or create the premium group conversation to get its ID
+                const premiumConversation = await ConversationService.findOrCreatePremiumGroup();
+                const conversationId = premiumConversation.id;
+
+                const newMessage = await MessageService.sendMessage(userId, null, content, conversationId);
+                socket.nsp.to('premium').emit('receive_message', newMessage);
             } catch (error) {
                 console.error('Error sending message:', error);
                 socket.emit('message_error', 'Failed to send message.');

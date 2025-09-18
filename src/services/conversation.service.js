@@ -35,6 +35,14 @@ const ConversationService = {
     });
     return conversations;
   },
+
+  async findOrCreatePremiumGroup() {
+    const [conversation] = await Conversation.findOrCreate({
+      where: { user1_id: null, user2_id: null },
+      defaults: { user1_id: null, user2_id: null },
+    });
+    return conversation;
+  },
 };
 
 module.exports = ConversationService;
