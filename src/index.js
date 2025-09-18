@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { initSocket } = require('./sockets/socketManager');
+const { initPremiumSocket } = require('./sockets/premiumSockerManager');
 const helmet = require('helmet');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
@@ -16,6 +17,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:80',
   'http://localhost:3001',
+  'http://localhost:63342'
 ];
 
 
@@ -43,6 +45,7 @@ if (!process.env.JWT_SECRET) {
 app.use(helmet());
 
 initSocket(server);
+initPremiumSocket(server);
 
 app.use(cors(corsOptions));
 app.use(express.json());
