@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const conversationRoutes = require('./routes/conversation.routes');
 const messageRoutes = require('./routes/message.routes');
+const conversationPremiumRoutes = require('./routes/conversationPremium.routes');
 const sequelize = require('./config/db');
 const errorHandler = require("./middleware/errorHandler");
 const cors = require('cors');
@@ -54,6 +55,7 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/conversations', conversationRoutes);
 app.use('/messages', messageRoutes);
+app.use('/premium', conversationPremiumRoutes);
 
 app.use(errorHandler);
 
