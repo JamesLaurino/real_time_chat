@@ -1,10 +1,20 @@
 const service = require('../services/conversationUser.service');
+const conversationService = require('../services/conversation.service');
 
 const conversationPremiumController = {
 
     async create (req, res) {
         try {
             const conversationUser = await service.create(req.body);
+            res.status(201).json(conversationUser);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    },
+
+    async createPremiumConversationPremium (req, res) {
+        try {
+            const conversationUser = await conversationService.createPremiumConversation();
             res.status(201).json(conversationUser);
         } catch (err) {
             res.status(400).json({ error: err.message });

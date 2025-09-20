@@ -4,6 +4,7 @@ const authMiddleware = require('../middleware/auth.middleware');
 const premiumController = require('../controllers/conversationPremium.controller');
 
 router.post('/', authMiddleware, premiumController.create);
+router.post('/conversation', authMiddleware, premiumController.createPremiumConversationPremium);
 router.get('/', authMiddleware, premiumController.getAll);
 router.get('/:id', authMiddleware, premiumController.getOne);
 router.put('/:id', authMiddleware, premiumController.update);

@@ -26,20 +26,16 @@ function initPremiumSocket(server) {
 
         socket.broadcast.emit('user_status_changed', { userId, online: true });
 
-        socket.on('join_conversation', async (conversationName) => { // e.g., conversationName is 'premium'
-            if (conversationName === 'premium') {
-                socket.join('premium');
-                console.log(`User ${userId} joined premium conversation room`);
+        socket.on('join_conversation', async (conversationId) => {
+                socket.join('premium conversation room : ' + conversationId);
+                console.log(`User ${userId} joined premium conversation room ` + conversationId);
 
-                const premiumConversation = await ConversationService.findOrCreatePremiumGroup();
+                //const premiumConversation = await ConversationService.findPremiumConversationById(conversationId);
+                // premiumConversation.id
 
-                // Here you would add the user to the conversation_user table
-                // Note: You might want to check if the user is already in the group first
-                // For simplicity, we'll just try to add them.
                 try {
-                    await ConversationUserService.create({ conversation_id: premiumConversation.id, user_id: userId });
+                    await ConversationUserService.create({ conversation_id: conversationId, user_id: userId });
                 } catch (e) {
-                    // Ignore unique constraint errors if the user is already in the group
                     if (e.name !== 'SequelizeUniqueConstraintError') {
                         console.error('Failed to add user to premium group', e);
                     }
@@ -48,17 +44,16 @@ function initPremiumSocket(server) {
                 const socketsInRoom = await premiumNamespace.in('premium').fetchSockets();
                 const userIdsInRoom = socketsInRoom.map(s => s.decoded.id);
                 premiumNamespace.to('premium').emit('user_list_update', userIdsInRoom);
-            }
         });
 
 
-        socket.on('send_message', async ({ content }) => { // recipientId and conversationId are removed from client payload
+        // MESSAGE_DATA  : { conversationId, content }
+        socket.on('send_message', async (messageData) => {
             try {
-                // Find or create the premium group conversation to get its ID
-                const premiumConversation = await ConversationService.findOrCreatePremiumGroup();
-                const conversationId = premiumConversation.id;
+                //const premiumConversation = await ConversationService.findPremiumConversationById(messageData.conversationId);
+                const conversationId = messageData.conversationId;
 
-                const newMessage = await MessageService.sendMessage(userId, null, content, conversationId);
+                const newMessage = await MessageService.sendMessage(userId, null, messageData.content, conversationId);
                 socket.nsp.to('premium').emit('receive_message', newMessage);
             } catch (error) {
                 console.error('Error sending message:', error);
@@ -71,7 +66,6 @@ function initPremiumSocket(server) {
             onlineUsers.delete(userId);
             ioInstance.emit('user_status_changed', { userId, online: false });
 
-            // Update user list in rooms the user was in
             for (const room of socket.rooms) {
                 if (room !== socket.id) {
                     const socketsInRoom = await io.of('/conversation/premium').in(room).fetchSockets();

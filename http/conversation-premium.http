@@ -1,0 +1,11 @@
+### Create new conversation premium
+POST http://localhost:3000/premium/conversation
+Content-Type: application/json
+
+{
+  "user1_id": null,
+  "user2_id": null
+}
+
+### GET all conversation
+GET http://localhost:3000/premium
