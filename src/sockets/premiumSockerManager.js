@@ -41,9 +41,9 @@ function initPremiumSocket(server) {
                     }
                 }
 
-                const socketsInRoom = await premiumNamespace.in('premium').fetchSockets();
+                const socketsInRoom = await premiumNamespace.in('premium conversation room : ' + conversationId).fetchSockets();
                 const userIdsInRoom = socketsInRoom.map(s => s.decoded.id);
-                premiumNamespace.to('premium').emit('user_list_update', userIdsInRoom);
+                premiumNamespace.to('premium conversation room : ' + conversationId).emit('user_list_update', userIdsInRoom);
         });
 
 
@@ -54,7 +54,7 @@ function initPremiumSocket(server) {
                 const conversationId = messageData.conversationId;
 
                 const newMessage = await MessageService.sendMessage(userId, null, messageData.content, conversationId);
-                socket.nsp.to('premium').emit('receive_message', newMessage);
+                socket.nsp.to('premium conversation room : ' + conversationId).emit('receive_message', newMessage);
             } catch (error) {
                 console.error('Error sending message:', error);
                 socket.emit('message_error', 'Failed to send message.');
