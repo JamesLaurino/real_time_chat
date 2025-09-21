@@ -8,7 +8,7 @@ const onlineUsers = new Map();
 
 function initPremiumSocket(server) {
     const io = socketIO(server, {
-        path: '/socket.io-premium/', // Chemin unique pour ce service
+        path: '/socket.io-premium/',
         cors: {
             origin: '*',
         },
@@ -19,7 +19,7 @@ function initPremiumSocket(server) {
     premiumNamespace.use(authenticateSocket);
 
     premiumNamespace.on('connection', (socket) => {
-        const { id: userId } = socket.decoded; // Use 'id' from JWT payload and rename it to userId
+        const { id: userId } = socket.decoded;
         console.log(`User connected: ${userId} with socket ${socket.id}`);
         onlineUsers.set(userId, true);
 

@@ -19,8 +19,8 @@ const ConversationService = {
     return conversation;
   },
 
-  async createPremiumConversation() {
-    return await Conversation.create({ user1_id: null, user2_id: null });
+  async createPremiumConversation(user_id) {
+    return await Conversation.create({ user1_id: user_id, user2_id: user_id });
   },
 
   async findPremiumConversationById(conversationId) {

@@ -14,7 +14,7 @@ const conversationPremiumController = {
 
     async createPremiumConversationPremium (req, res) {
         try {
-            const conversationUser = await conversationService.createPremiumConversation();
+            const conversationUser = await conversationService.createPremiumConversation(req.body.user_id);
             res.status(201).json(conversationUser);
         } catch (err) {
             res.status(400).json({ error: err.message });
