@@ -1,11 +1,10 @@
 const socketIO = require('socket.io');
 const { authenticateSocket } = require('../middleware/socket.middleware');
 const ConversationUserService = require('../services/conversationUser.service.js');
-const ConversationService = require('../services/conversation.service.js');
 const MessageService = require('../services/message.service');
+const User = require('../models/user.model');
 
 const onlineUsers = new Map();
-let ioInstance;
 
 function initPremiumSocket(server) {
     const io = socketIO(server, {
@@ -30,9 +29,6 @@ function initPremiumSocket(server) {
                 socket.join('premium conversation room : ' + conversationId);
                 console.log(`User ${userId} joined premium conversation room ` + conversationId);
 
-                //const premiumConversation = await ConversationService.findPremiumConversationById(conversationId);
-                // premiumConversation.id
-
                 try {
                     await ConversationUserService.create({ conversation_id: conversationId, user_id: userId });
                 } catch (e) {
@@ -53,7 +49,6 @@ function initPremiumSocket(server) {
         // MESSAGE_DATA  : { conversationId, content }
         socket.on('send_message', async (messageData) => {
             try {
-                //const premiumConversation = await ConversationService.findPremiumConversationById(messageData.conversationId);
                 const conversationId = messageData.conversationId;
 
                 const newMessage = await MessageService.sendMessage(userId, null, messageData.content, conversationId);
@@ -67,13 +62,13 @@ function initPremiumSocket(server) {
         socket.on('disconnect', async () => {
             console.log(`User disconnected: ${userId}`);
             onlineUsers.delete(userId);
-            ioInstance.emit('user_status_changed', { userId, online: false });
+            premiumNamespace.emit('user_status_changed', { userId, online: false });
 
             for (const room of socket.rooms) {
                 if (room !== socket.id) {
-                    const socketsInRoom = await io.of('/conversation/premium').in(room).fetchSockets();
-                    const userIdsInRoom = socketsInRoom.map(s => s.decoded.userId);
-                    io.of('/conversation/premium').to(room).emit('user_list_update', userIdsInRoom);
+                    const socketsInRoom = await premiumNamespace.in(room).fetchSockets();
+                    const userIdsInRoom = socketsInRoom.map(s => s.decoded.id);
+                    premiumNamespace.to(room).emit('user_list_update', userIdsInRoom);
                 }
             }
         });
@@ -86,16 +81,8 @@ function isUserOnline(userId) {
     return onlineUsers.has(userId);
 }
 
-function getIo() {
-    if (!ioInstance) {
-        throw new Error('Socket.io not initialized!');
-    }
-    return ioInstance;
-}
-
 module.exports = {
     initPremiumSocket,
     isUserOnline,
-    getIo,
     onlineUsers,
 };

@@ -126,10 +126,8 @@
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
         
-        // A simple way to check if the message is from the current user
-        // This requires decoding the JWT, which is complex on the client.
-        // For this test, we'll just display sender ID.
-        messageElement.textContent = `User ${message.senderId}: ${message.content}`;
+        const senderName = message.sender ? message.sender.username : `User ${message.senderId}`;
+        messageElement.textContent = `${senderName}: ${message.content}`;
 
         messagesDiv.appendChild(messageElement);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
