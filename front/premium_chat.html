@@ -110,6 +110,10 @@
         socket.on('user_list_update', (userIds) => {
             updateUserList(userIds);
         });
+
+        socket.on('user_joined', (data) => {
+            alert(`${data.username} has joined the chat.`);
+        });
         
         socket.on('message_error', (errorMessage) => {
             console.error('Message error:', errorMessage);
