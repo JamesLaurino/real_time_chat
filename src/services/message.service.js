@@ -60,10 +60,20 @@ const MessageService = {
   },
 
   async getMessagesByConversationId(conversationId) {
-    return Message.findAll({
+    const messages = await Message.findAll({
       where: { conversation_id: conversationId },
+      include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }],
       order: [['created_at', 'ASC']],
     });
+
+    return messages.map(message => ({
+      id: message.id,
+      conversationId: message.conversation_id,
+      senderId: message.sender_id,
+      content: message.content,
+      createdAt: message.created_at,
+      sender: message.sender,
+    }));
   }
 };
 
