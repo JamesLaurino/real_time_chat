@@ -44,6 +44,9 @@ function initPremiumSocket(server) {
                 const socketsInRoom = await premiumNamespace.in('premium conversation room : ' + conversationId).fetchSockets();
                 const userIdsInRoom = socketsInRoom.map(s => s.decoded.id);
                 premiumNamespace.to('premium conversation room : ' + conversationId).emit('user_list_update', userIdsInRoom);
+
+                const history = await MessageService.getMessagesByConversationId(conversationId);
+                socket.emit('conversation_history', history);
         });
 
 

@@ -57,6 +57,13 @@ const MessageService = {
       content: newMessage.content,
       createdAt: newMessage.created_at,
     };
+  },
+
+  async getMessagesByConversationId(conversationId) {
+    return Message.findAll({
+      where: { conversation_id: conversationId },
+      order: [['created_at', 'ASC']],
+    });
   }
 };
 

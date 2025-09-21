@@ -93,6 +93,20 @@
             displayMessage(message);
         });
 
+        socket.on('conversation_history', (history) => {
+            messagesDiv.innerHTML = '';
+            history.forEach(message => {
+                displayMessage(message);
+            });
+        });
+
+        socket.on('conversation_history', (history) => {
+            messagesDiv.innerHTML = '';
+            history.forEach(message => {
+                displayMessage(message);
+            });
+        });
+
         socket.on('user_list_update', (userIds) => {
             updateUserList(userIds);
         });
