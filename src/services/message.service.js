@@ -47,16 +47,35 @@ const MessageService = {
     // 2. Create the message in the database
     const newMessage = await Message.create({ conversation_id: conversation.id, sender_id: senderId, content });
 
-    // 3. DO NOT EMIT HERE. Let socketManager handle the emission.
-    // The message object returned here will be used by socketManager to emit.
+    const messageWithSender = await Message.findByPk(newMessage.id, {
+      include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }],
+    });
 
     return {
-      id: newMessage.id,
-      conversationId: newMessage.conversation_id,
-      senderId: newMessage.sender_id,
-      content: newMessage.content,
-      createdAt: newMessage.created_at,
+      id: messageWithSender.id,
+      conversationId: messageWithSender.conversation_id,
+      senderId: messageWithSender.sender_id,
+      content: messageWithSender.content,
+      createdAt: messageWithSender.created_at,
+      sender: messageWithSender.sender,
     };
+  },
+
+  async getMessagesByConversationId(conversationId) {
+    const messages = await Message.findAll({
+      where: { conversation_id: conversationId },
+      include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }],
+      order: [['created_at', 'ASC']],
+    });
+
+    return messages.map(message => ({
+      id: message.id,
+      conversationId: message.conversation_id,
+      senderId: message.sender_id,
+      content: message.content,
+      createdAt: message.created_at,
+      sender: message.sender,
+    }));
   }
 };
 

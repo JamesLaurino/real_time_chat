@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Chat</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; display: flex; flex-direction: column; align-items: center; }
+        #config { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
+        #chat-container { width: 500px; }
+        #user-list { font-weight: bold; margin-bottom: 10px; }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; }
+        .message { background-color: #f0f0f0; padding: 8px; margin-bottom: 8px; border-radius: 5px; }
+        .my-message { background-color: #dcf8c6; }
+        #message-input { width: calc(100% - 80px); padding: 10px; }
+        button { padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<h1>Premium Chat Test</h1>
+
+<div id="config">
+    <label for="token-input">JWT Token:</label>
+    <input type="text" id="token-input" size="50" placeholder="Enter your JWT token">
+    <br>
+    <label for="conversation-id-input">Conversation ID:</label>
+    <input type="text" id="conversation-id-input" value="premium" placeholder="Enter conversation ID">
+    <br>
+    <button id="connect-button">Connect</button>
+</div>
+
+<div id="chat-container" style="display: none;">
+    <h3>Connected Users:</h3>
+    <div id="user-list"></div>
+    <div id="messages"></div>
+    <input type="text" id="message-input" placeholder="Type your message...">
+    <button id="send-button">Send</button>
+</div>
+
+<script>
+    const SERVER_URL = 'http://localhost:3000/conversation/premium';
+    let socket;
+
+    const configDiv = document.getElementById('config');
+    const chatContainer = document.getElementById('chat-container');
+    const tokenInput = document.getElementById('token-input');
+    const conversationIdInput = document.getElementById('conversation-id-input');
+    const connectButton = document.getElementById('connect-button');
+    const userListDiv = document.getElementById('user-list');
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+
+    connectButton.addEventListener('click', () => {
+        const token = tokenInput.value.trim();
+        const conversationId = conversationIdInput.value.trim();
+
+        if (!token || !conversationId) {
+            alert('Please provide a JWT token and a Conversation ID.');
+            return;
+        }
+
+        connectToChat(token, conversationId);
+    });
+
+    function connectToChat(token, conversationId) {
+        socket = io(SERVER_URL, {
+            path: '/socket.io-premium/', // Chemin unique pour ce service
+            auth: { token }
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to premium chat with socket ID:', socket.id);
+            configDiv.style.display = 'none';
+            chatContainer.style.display = 'block';
+            socket.emit('join_conversation', conversationId);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from premium chat');
+            configDiv.style.display = 'block';
+            chatContainer.style.display = 'none';
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('Connection error:', err.message);
+            alert('Connection Error: ' + err.message);
+        });
+
+        socket.on('receive_message', (message) => {
+            displayMessage(message);
+        });
+
+        socket.on('conversation_history', (history) => {
+            messagesDiv.innerHTML = '';
+            history.forEach(message => {
+                displayMessage(message);
+            });
+        });
+
+        socket.on('conversation_history', (history) => {
+            messagesDiv.innerHTML = '';
+            history.forEach(message => {
+                displayMessage(message);
+            });
+        });
+
+        socket.on('user_list_update', (userIds) => {
+            updateUserList(userIds);
+        });
+
+        socket.on('user_joined', (data) => {
+            alert(`${data.username} has joined the chat.`);
+        });
+        
+        socket.on('message_error', (errorMessage) => {
+            console.error('Message error:', errorMessage);
+            alert('Message Error: ' + errorMessage);
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    }
+
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        
+        const senderName = message.sender ? message.sender.username : `User ${message.senderId}`;
+        messageElement.textContent = `${senderName}: ${message.content}`;
+
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function updateUserList(userIds) {
+        userListDiv.textContent = 'Users: ' + userIds.join(', ');
+    }
+
+    function sendMessage() {
+        const content = messageInput.value.trim();
+        const conversationId = conversationIdInput.value.trim();
+        if (content && conversationId) {
+            // For premium chat, recipientId might not be needed if sending to a group
+            const messageData = {
+                conversationId: conversationId,
+                content: content
+            };
+            socket.emit('send_message', messageData);
+            messageInput.value = '';
+        }
+    }
+</script>
+</body>
+</html>

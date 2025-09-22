@@ -1,11 +1,13 @@
 const express = require('express');
 const http = require('http');
 const { initSocket } = require('./sockets/socketManager');
+const { initPremiumSocket } = require('./sockets/premiumSockerManager');
 const helmet = require('helmet');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const conversationRoutes = require('./routes/conversation.routes');
 const messageRoutes = require('./routes/message.routes');
+const conversationPremiumRoutes = require('./routes/conversationPremium.routes');
 const sequelize = require('./config/db');
 const errorHandler = require("./middleware/errorHandler");
 const cors = require('cors');
@@ -15,6 +17,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:80',
   'http://localhost:3001',
+  'http://localhost:63342'
 ];
 
 
@@ -42,6 +45,7 @@ if (!process.env.JWT_SECRET) {
 app.use(helmet());
 
 initSocket(server);
+initPremiumSocket(server);
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -54,6 +58,7 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/conversations', conversationRoutes);
 app.use('/messages', messageRoutes);
+app.use('/premium', conversationPremiumRoutes);
 
 app.use(errorHandler);
 

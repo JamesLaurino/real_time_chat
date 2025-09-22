@@ -56,6 +56,7 @@ Example Error Response:
         "id": "number",
         "username": "string",
         "email": "string",
+        "premium": "boolean",
         "created_at": "datetime"
       }
     }
@@ -174,6 +175,7 @@ Example Error Response:
         "id": "number",
         "username": "string",
         "email": "string",
+        "premium": "boolean",
         "created_at": "datetime"
       }
     }
