@@ -1,6 +1,5 @@
 
-@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1NzI0ODExNiwiZXhwIjoxNzU3MjUxNzE2fQ.JJ3MGqqg5FBKcUPZylnTEWHmcGUAZMr6e6V925oFPzM
-
+@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJnaW4iLCJwcmVtaXVtIjpmYWxzZSwiaWF0IjoxNzU3ODUwMDQxLCJleHAiOjE3NTc4NTM2NDF9.HGHiwLo7sJJf_9qclMz1WcRtWhZykeVFaOU6IVXgOxM
 
 ### GET user information
 
@@ -10,4 +9,16 @@ Authorization: {{jwt_token}}
 ### GET user conversation
 
 GET http://localhost:3000/users/me/conversations
+Authorization: {{jwt_token}}
+
+### UPDATE PREMIUM
+
+PUT http://localhost:3000/users/premium
+Authorization: {{jwt_token}}
+Content-Type: application/json
+
+{"email":"alice@example.com", "premium": true}
+
+### GET ALL USERS
+GET http://localhost:3000/users
 Authorization: {{jwt_token}}

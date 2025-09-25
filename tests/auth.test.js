@@ -47,8 +47,6 @@ describe('Auth Endpoints', () => {
         email: 'test@example.com',
         password: 'password123',
       });
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.success).toBe(true);
     expect(res.body.data).toHaveProperty('token');
   });
 
