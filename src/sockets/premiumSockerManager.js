@@ -25,28 +25,29 @@ function initPremiumSocket(server) {
 
         socket.broadcast.emit('user_status_changed', { userId, online: true });
 
+        console.log("Conversation ID : " + conversationId);
         socket.on('join_conversation', async (conversationId) => {
-                socket.join('premium conversation room : ' + conversationId);
-                console.log(`User ${userId} joined premium conversation room ` + conversationId);
+            socket.join('premium conversation room : ' + conversationId);
+            console.log(`User ${userId} joined premium conversation room ` + conversationId);
 
-                try {
-                    await ConversationUserService.create({ conversation_id: conversationId, user_id: userId });
-                } catch (e) {
-                    if (e.name !== 'SequelizeUniqueConstraintError') {
-                        console.error('Failed to add user to premium group', e);
-                    }
+            try {
+                await ConversationUserService.create({ conversation_id: conversationId, user_id: userId });
+            } catch (e) {
+                if (e.name !== 'SequelizeUniqueConstraintError') {
+                    console.error('Failed to add user to premium group', e);
                 }
+            }
 
-                const socketsInRoom = await premiumNamespace.in('premium conversation room : ' + conversationId).fetchSockets();
-                const userIdsInRoom = socketsInRoom.map(s => s.decoded.id);
-                premiumNamespace.to('premium conversation room : ' + conversationId).emit('user_list_update', userIdsInRoom);
+            const socketsInRoom = await premiumNamespace.in('premium conversation room : ' + conversationId).fetchSockets();
+            const userIdsInRoom = socketsInRoom.map(s => s.decoded.id);
+            premiumNamespace.to('premium conversation room : ' + conversationId).emit('user_list_update', userIdsInRoom);
 
-                const user = await User.findByPk(userId);
-                const username = user ? user.username : `User ${userId}`;
-                premiumNamespace.to('premium conversation room : ' + conversationId).emit('user_joined', { userId, username });
+            const user = await User.findByPk(userId);
+            const username = user ? user.username : `User ${userId}`;
+            premiumNamespace.to('premium conversation room : ' + conversationId).emit('user_joined', { userId, username });
 
-                const history = await MessageService.getMessagesByConversationId(conversationId);
-                socket.emit('conversation_history', history);
+            const history = await MessageService.getMessagesByConversationId(conversationId);
+            socket.emit('conversation_history', history);
         });
 
 
@@ -55,6 +56,7 @@ function initPremiumSocket(server) {
             try {
                 const conversationId = messageData.conversationId;
 
+                console.log("Message Data : " + messageData);
                 const newMessage = await MessageService.sendMessage(userId, null, messageData.content, conversationId);
                 socket.nsp.to('premium conversation room : ' + conversationId).emit('receive_message', newMessage);
             } catch (error) {
