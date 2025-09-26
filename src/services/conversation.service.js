@@ -3,7 +3,6 @@ const User = require('../models/user.model');
 const { Op } = require('sequelize');
 
 const ConversationService = {
-  // TODO: Extend this to support creating group conversations with multiple users.
   async findOrCreateConversation(user1Id, user2Id) {
     const [conversation, created] = await Conversation.findOrCreate({
       where: {
@@ -20,6 +19,14 @@ const ConversationService = {
     return conversation;
   },
 
+  async createPremiumConversation(user_id) {
+    return await Conversation.create({ user1_id: user_id, user2_id: user_id });
+  },
+
+  async findPremiumConversationById(conversationId) {
+    return await Conversation.findByPk(conversationId);
+  },
+
   async getUserConversations(userId) {
     const conversations = await Conversation.findAll({
       where: {
@@ -34,6 +41,14 @@ const ConversationService = {
       ],
     });
     return conversations;
+  },
+
+  async findOrCreatePremiumGroup() {
+    const [conversation] = await Conversation.findOrCreate({
+      where: { user1_id: null, user2_id: null },
+      defaults: { user1_id: null, user2_id: null },
+    });
+    return conversation;
   },
 };
 

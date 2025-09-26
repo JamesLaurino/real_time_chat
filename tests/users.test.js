@@ -38,4 +38,26 @@ describe('Users Endpoint', () => {
     const res = await request(app).get('/users');
     expect(res.statusCode).toEqual(401);
   });
+
+  it('should toggle the premium status of a user', async () => {
+    // First, update to premium
+    const res_to_premium = await request(app)
+      .put('/users/premium')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ email: 'user2@test.com', premium: true });
+
+    expect(res_to_premium.statusCode).toEqual(200);
+    expect(res_to_premium.body.success).toBe(true);
+    expect(res_to_premium.body.data.premium).toBe(true);
+
+    // Then, update back to not premium
+    const res_to_not_premium = await request(app)
+      .put('/users/premium')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ email: 'user2@test.com', premium: false });
+
+    expect(res_to_not_premium.statusCode).toEqual(200);
+    expect(res_to_not_premium.body.success).toBe(true);
+    expect(res_to_not_premium.body.data.premium).toBe(false);
+  });
 });

@@ -1,0 +1,13 @@
+@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBbGljZSIsInByZW1pdW0iOnRydWUsImlhdCI6MTc1ODg2OTU2MSwiZXhwIjoxNzU4ODczMTYxfQ.7RHMJaRg6VXr8IXWhMrRgoOofc3c_dn7n1fPBQ_SCHw
+
+### Create new conversation premium
+POST http://localhost:3000/premium/conversation
+Authorization: {{jwt_token}}
+Content-Type: application/json
+
+{
+  "user_id": 1
+}
+
+### GET all conversation
+GET http://localhost:3000/premium

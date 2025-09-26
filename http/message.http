@@ -1,0 +1,11 @@
+@jwt_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJnaW4iLCJwcmVtaXVtIjpmYWxzZSwiaWF0IjoxNzU3OTI3NzUxLCJleHAiOjE3NTc5MzEzNTF9.Gy1zGUWpODlo8RQWYvwGmuMuSgPMTJQxQZuOn2kezCA
+
+### Send a new message
+POST http://localhost:3000/messages
+Content-Type: application/json
+Authorization: {{jwt_token}}
+
+{
+  "recipientId": 2,
+  "content": "Hello from message.http"
+}
