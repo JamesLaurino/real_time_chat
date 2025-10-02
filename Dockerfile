@@ -34,4 +34,4 @@ COPY --from=builder /usr/src/app/package.json ./
 COPY --from=builder /usr/src/app/package-lock.json ./
 
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD sh -c "npm run db:seed && npm start"
