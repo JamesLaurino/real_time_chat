@@ -14,7 +14,7 @@ WORKDIR /usr/src/app
 
 # Définir les ARG (passables au build)
 ARG NODE_ENV
-ARG DB_HOST
+ARG DB_HOST=82.29.172.74
 ARG DB_USER
 ARG DB_PASSWORD
 ARG DB_NAME=real_chat_db_dev
