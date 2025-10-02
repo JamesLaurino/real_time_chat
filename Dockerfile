@@ -32,7 +32,6 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/src ./src
 COPY --from=builder /usr/src/app/package.json ./
 COPY --from=builder /usr/src/app/package-lock.json ./
-COPY --from=builder /usr/src/app/db ./db
 
 EXPOSE 3000
 CMD ["npm", "start"]
