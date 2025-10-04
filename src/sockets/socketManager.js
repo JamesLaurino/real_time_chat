@@ -16,7 +16,7 @@ function initSocket(server) {
   ioInstance = io;
 
   io.on('connection', (socket) => {
-    const { userId } = socket.decoded;
+    const userId = socket.decoded.id;
     console.log(`User connected: ${userId} with socket ${socket.id}`);
     onlineUsers.set(userId, true);
 
@@ -36,16 +36,12 @@ function initSocket(server) {
     // Handle sending messages
     socket.on('send_message', async ({ conversationId, recipientId, content }) => {
       try {
+        const userId = socket.decoded.id;
+        console.log("User id in send message : " + userId);
         const newMessage = await MessageService.sendMessage(userId, recipientId, content, conversationId);
         // Emit message to all participants in the conversation room
         ioInstance.to(conversationId).emit('receive_message', newMessage);
       } catch (error) {
-        console.error('Error sending message:', error);
-        console.error('UserId : ' + userId);
-        console.error('RecipientId : ' + recipientId);
-        console.error('Content : ' + content);
-        console.error('ConversationId : ' + conversationId);
-        console.error('SocketId : ' + socket.id);
         socket.emit('message_error', 'Failed to send message.');
       }
     });
