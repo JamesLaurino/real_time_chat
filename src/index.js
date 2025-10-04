@@ -20,7 +20,8 @@ const allowedOrigins = [
   'http://localhost:63342',
   'http://82.29.172.74:80',
   'https://82.29.172.74:80',
-  'https://srv827971.hstgr.cloud:80'
+  'https://srv827971.hstgr.cloud:80',
+  'https://srv827971.hstgr.cloud'
 ];
 
 
