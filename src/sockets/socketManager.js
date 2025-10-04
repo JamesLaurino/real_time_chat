@@ -41,6 +41,11 @@ function initSocket(server) {
         ioInstance.to(conversationId).emit('receive_message', newMessage);
       } catch (error) {
         console.error('Error sending message:', error);
+        console.error('UserId : ' + userId);
+        console.error('RecipientId : ' + recipientId);
+        console.error('Content : ' + content);
+        console.error('ConversationId : ' + conversationId);
+        console.error('SocketId : ' + socket.id);
         socket.emit('message_error', 'Failed to send message.');
       }
     });

@@ -8,6 +8,7 @@ const MessageService = {
   async sendMessage(senderId, recipientId, content, conversationId) {
     // 1. Find or create the conversation (only if conversationId is not provided)
     let conversation;
+    console.log("Conversation ID in service message: " + conversationId);
     if (conversationId) {
       conversation = { id: conversationId };
     } else {
