@@ -1,4 +1,6 @@
 const Conversation = require('../models/conversation.model');
+const ConversationUser = require('../models/conversation_user.model');
+const Message = require('../models/message.model');
 const User = require('../models/user.model');
 const { Op } = require('sequelize');
 
@@ -19,8 +21,22 @@ const ConversationService = {
     return conversation;
   },
 
-  async createPremiumConversation(user_id) {
-    return await Conversation.create({ user1_id: user_id, user2_id: user_id });
+  async createPremiumConversation(user_id, name = null) {
+    // Create conversation with null user IDs for group chats
+    const conversation = await Conversation.create({
+      user1_id: null,
+      user2_id: null,
+      name: name
+    });
+
+    // Add creator to ConversationUser table (only once)
+    const ConversationUser = require('../models/conversation_user.model');
+    await ConversationUser.create({
+      conversation_id: conversation.id,
+      user_id: user_id
+    });
+
+    return conversation;
   },
 
   async findPremiumConversationById(conversationId) {
@@ -49,6 +65,28 @@ const ConversationService = {
       defaults: { user1_id: null, user2_id: null },
     });
     return conversation;
+  },
+
+  async deleteConversation(conversationId) {
+    const conversation = await Conversation.findByPk(conversationId);
+    if (!conversation) {
+      throw new Error('Conversation not found');
+    }
+
+    // Delete all related records before deleting the conversation
+    // 1. Delete all messages in this conversation
+    await Message.destroy({
+      where: { conversation_id: conversationId }
+    });
+
+    // 2. Delete all ConversationUser records (participants)
+    await ConversationUser.destroy({
+      where: { conversation_id: conversationId }
+    });
+
+    // 3. Finally delete the conversation itself
+    await conversation.destroy();
+    return { message: 'Conversation deleted successfully' };
   },
 };
 

@@ -24,6 +24,11 @@ const Conversation = sequelize.define('Conversation', {
       key: 'id',
     },
   },
+  name: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: 'Group chat name (null for 1-on-1 conversations)',
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
