@@ -4,3 +4,13 @@ node_modules
 .env.development
 .env.production
 .env.test
+.env.local
+
+# Local Docker setup (ignored for local development)
+docker-compose.local.yml
+.dockerignore
+DOCKER_LOCAL_SETUP.md
+
+# Local documentation (ignored)
+JWT_TOKENS.md
+JWT_VERIFICATION_RESULTS.md
