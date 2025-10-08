@@ -8,6 +8,7 @@ router.post('/conversation', authMiddleware, premiumController.createPremiumConv
 router.get('/', authMiddleware, premiumController.getAll);
 router.get('/:id', authMiddleware, premiumController.getOne);
 router.put('/:id', authMiddleware, premiumController.update);
+router.delete('/conversation/:id', authMiddleware, premiumController.deleteConversation);
 router.delete('/:id', authMiddleware, premiumController.remove);
 
 module.exports = router;

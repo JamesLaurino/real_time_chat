@@ -14,7 +14,8 @@ const conversationPremiumController = {
 
     async createPremiumConversationPremium (req, res) {
         try {
-            const conversationUser = await conversationService.createPremiumConversation(req.body.user_id);
+            const { user_id, name } = req.body;
+            const conversationUser = await conversationService.createPremiumConversation(user_id, name);
             res.status(201).json(conversationUser);
         } catch (err) {
             res.status(400).json({ error: err.message });
@@ -55,6 +56,15 @@ const conversationPremiumController = {
             const deleted = await service.delete(req.params.id);
             if (!deleted) return res.status(404).json({ message: 'Not found' });
             res.json({ message: 'Deleted successfully' });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    },
+
+    async deleteConversation (req, res) {
+        try {
+            const result = await conversationService.deleteConversation(req.params.id);
+            res.json(result);
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
