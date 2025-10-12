@@ -5,7 +5,8 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
     "start": "node src/index.js",
-    "db:seed": "node scripts/seed.js"
+    "db:seed": "node scripts/seed.js",
+    "db:unseed": "node scripts/unseed.js"
   },
   "keywords": [],
   "author": "",

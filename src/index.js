@@ -12,6 +12,8 @@ const sequelize = require('./config/db');
 const errorHandler = require("./middleware/errorHandler");
 const cors = require('cors');
 
+require('./models/load_model');
+
 // Configuration CORS
 const allowedOrigins = [
   'http://localhost:3000',
